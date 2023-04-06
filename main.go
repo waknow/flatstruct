@@ -47,7 +47,8 @@ func main() {
 		value: p,
 	}
 	travelInterface(&root, p)
-	printTree(0, root)
+	fmt.Println("Tree:")
+	PrintTree(root)
 
 	path := "root.Addrs"
 	values := findValues(root, path)
@@ -218,17 +219,6 @@ func findValues(root *value, path string) []*value {
 	return nil
 }
 
-func printTree(level int, root *value) {
-	if root.kind == kindValue {
-		fmt.Printf("%s%s(%s): %v\n", strings.Repeat("\t", level), root.name, root.kind, root.value)
-		return
-	}
-	fmt.Printf("%s%s(%s)\n", strings.Repeat("\t", level), root.name, root.kind)
-	for _, child := range root.children {
-		printTree(level+1, child)
-	}
-}
-
 const (
 	kindValue  = "value"
 	kindArray  = "array"
@@ -244,8 +234,23 @@ type value struct {
 	children []*value
 }
 
+func (v value) Parent() Treer {
+	return v.parent
+}
+
+func (v value) Children() []Treer {
+	var children []Treer
+	for _, child := range v.children {
+		children = append(children, child)
+	}
+	return children
+}
+
 func (v value) String() string {
-	return fmt.Sprintf("%s(%s): %v", v.name, v.kind, v.value)
+	if len(v.children) == 0 {
+		return fmt.Sprintf("%s(%s): %v", v.name, v.kind, v.value)
+	}
+	return fmt.Sprintf("%s(%s)", v.name, v.kind)
 }
 
 func travelInterface(root **value, i interface{}) {
@@ -323,4 +328,49 @@ func kindOf(v interface{}) string {
 	default:
 		panic(fmt.Sprintf("unknown type: %s", t.Kind()))
 	}
+}
+
+type Treer interface {
+	Parent() Treer
+	Children() []Treer
+	String() string
+}
+
+func PrintTree(t Treer) {
+	printTree([]bool{}, t)
+}
+
+func printTree(prefixes []bool, t Treer) {
+	fmt.Print(getPrefix(prefixes), t, "\n")
+	for idx, child := range t.Children() {
+		printTree(append(prefixes, idx != len(t.Children())-1), child)
+	}
+}
+
+func getPrefix(prefixes []bool) string {
+	l := len(prefixes)
+
+	if l == 0 {
+		return ""
+	}
+
+	last := prefixes[l-1]
+	prefixes = prefixes[:l-1]
+
+	var s string
+	for _, prefix := range prefixes {
+		if prefix {
+			s += "│  "
+		} else {
+			s += "   "
+		}
+	}
+
+	if last {
+		s += "├─ "
+	} else {
+		s += "└─ "
+	}
+
+	return s
 }
