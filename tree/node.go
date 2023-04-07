@@ -34,6 +34,11 @@ func (n *Node) Parent() Treer {
 	if n == nil {
 		return nil
 	}
+
+	if n.parent == nil {
+		return nil
+	}
+
 	return n.parent
 }
 
@@ -65,15 +70,15 @@ func (n *Node) SetChildren(children []Treer) {
 	if n == nil {
 		return
 	}
-	n.children = make([]*Node, len(children))
-	for idx, child := range children {
-		n.children[idx] = child.(*Node)
+	n.children = nil
+	for _, child := range children {
+		n.children = append(n.children, child.(*Node))
 	}
 }
 
 func (n *Node) String() string {
 	if n == nil {
-		return ""
+		return "<nil>"
 	}
 	return n.Name
 }

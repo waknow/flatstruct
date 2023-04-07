@@ -67,7 +67,7 @@ func main() {
 	}
 
 	fmt.Println("Random Tree:")
-	rt := tree.RandomTree(4, 2)
+	rt := tree.RandomTree(4, 3)
 	tree.PrintTree(rt)
 	path = tree.RandomPath(rt)
 	fmt.Println("random path", path)

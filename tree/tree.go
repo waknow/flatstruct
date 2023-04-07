@@ -75,22 +75,11 @@ func RebuildTreeByNode(node Treer) {
 
 	parent := node.Parent()
 
-	// if node.parent.parent == nil {
-	// 	fmt.Println("--", node.Name, "parent:", node.parent.Name, "grandparent:", nil)
-	// } else {
-	// 	fmt.Println("--", node.Name, "parent:", node.parent.Name, "grandparent:", node.parent.parent.Name)
-	// }
-
 	siblings := siblings(node)
+	// fmt.Println(node.ID(), parent, "siblings:", siblings)
 	parent.SetChildren(nil)
 	node.SetChildren(append([]Treer{parent}, siblings...))
 	node.SetParent(nil)
-
-	// if parent != nil {
-	// 	fmt.Println("[]", node.Name, "children:", Nodes(node.children), "parent:", parent.Name)
-	// } else {
-	// 	fmt.Println("[]", node.Name, "children:", Nodes(node.children), "parent:", nil)
-	// }
 
 	RebuildTreeByNode(parent)
 	parent.SetParent(node)
