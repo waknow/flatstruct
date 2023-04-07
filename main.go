@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"struct-flat/tree"
 )
 
 type Address struct {
@@ -48,7 +49,7 @@ func main() {
 	}
 	travelInterface(&root, p)
 	fmt.Println("Tree:")
-	PrintTree(root)
+	tree.PrintTree(root)
 
 	path := "root.Addrs"
 	values := findValues(root, path)
@@ -64,6 +65,21 @@ func main() {
 			fmt.Println("values", value)
 		}
 	}
+
+	fmt.Println("Random Tree:")
+	rt := tree.RandomTree(4, 2)
+	tree.PrintTree(rt)
+	path = tree.RandomPath(rt)
+	fmt.Println("random path", path)
+	rt = tree.FindNode(rt, path)
+	tree.RebuildTreeByNode(rt)
+	tree.PrintTree(rt)
+
+	path = tree.ReversePath(path)
+	fmt.Println("reverse path", path)
+	rt = tree.FindNode(rt, path)
+	tree.RebuildTreeByNode(rt)
+	tree.PrintTree(rt)
 }
 
 func findRelateValues(v *value) ([]string, [][]interface{}, error) {
@@ -234,12 +250,16 @@ type value struct {
 	children []*value
 }
 
-func (v value) Parent() Treer {
+func (v value) ID() string {
+	return v.name
+}
+
+func (v value) Parent() tree.Treer {
 	return v.parent
 }
 
-func (v value) Children() []Treer {
-	var children []Treer
+func (v value) Children() []tree.Treer {
+	var children []tree.Treer
 	for _, child := range v.children {
 		children = append(children, child)
 	}
@@ -251,6 +271,27 @@ func (v value) String() string {
 		return fmt.Sprintf("%s(%s): %v", v.name, v.kind, v.value)
 	}
 	return fmt.Sprintf("%s(%s)", v.name, v.kind)
+}
+
+func (v *value) SetParent(parent tree.Treer) {
+	if v == nil {
+		return
+	}
+	if parent == nil {
+		v.parent = nil
+		return
+	}
+	v.parent = parent.(*value)
+}
+
+func (v *value) SetChildren(children []tree.Treer) {
+	if v == nil {
+		return
+	}
+	v.children = nil
+	for _, child := range children {
+		v.children = append(v.children, child.(*value))
+	}
 }
 
 func travelInterface(root **value, i interface{}) {
@@ -328,49 +369,4 @@ func kindOf(v interface{}) string {
 	default:
 		panic(fmt.Sprintf("unknown type: %s", t.Kind()))
 	}
-}
-
-type Treer interface {
-	Parent() Treer
-	Children() []Treer
-	String() string
-}
-
-func PrintTree(t Treer) {
-	printTree([]bool{}, t)
-}
-
-func printTree(prefixes []bool, t Treer) {
-	fmt.Print(getPrefix(prefixes), t, "\n")
-	for idx, child := range t.Children() {
-		printTree(append(prefixes, idx != len(t.Children())-1), child)
-	}
-}
-
-func getPrefix(prefixes []bool) string {
-	l := len(prefixes)
-
-	if l == 0 {
-		return ""
-	}
-
-	last := prefixes[l-1]
-	prefixes = prefixes[:l-1]
-
-	var s string
-	for _, prefix := range prefixes {
-		if prefix {
-			s += "│  "
-		} else {
-			s += "   "
-		}
-	}
-
-	if last {
-		s += "├─ "
-	} else {
-		s += "└─ "
-	}
-
-	return s
 }
