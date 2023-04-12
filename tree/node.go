@@ -23,7 +23,7 @@ type Node struct {
 	children []*Node
 }
 
-func NewNode(t Treer) Treer {
+func NewNode(t Noder) Noder {
 	if t == nil {
 		return nil
 	}
@@ -45,7 +45,7 @@ func (n *Node) ID() string {
 	return n.Name
 }
 
-func (n *Node) Parent() Treer {
+func (n *Node) Parent() Noder {
 	if n == nil {
 		return nil
 	}
@@ -57,18 +57,18 @@ func (n *Node) Parent() Treer {
 	return n.parent
 }
 
-func (n *Node) Children() []Treer {
+func (n *Node) Children() []Noder {
 	if n == nil {
 		return nil
 	}
-	children := make([]Treer, len(n.children))
+	children := make([]Noder, len(n.children))
 	for idx, child := range n.children {
 		children[idx] = child
 	}
 	return children
 }
 
-func (n *Node) SetParent(parent Treer) {
+func (n *Node) SetParent(parent Noder) {
 	if n == nil {
 		return
 	}
@@ -81,7 +81,7 @@ func (n *Node) SetParent(parent Treer) {
 	n.parent = parent.(*Node)
 }
 
-func (n *Node) SetChildren(children []Treer) {
+func (n *Node) SetChildren(children []Noder) {
 	if n == nil {
 		return
 	}
@@ -98,7 +98,7 @@ func (n *Node) String() string {
 	return n.Name
 }
 
-func RandomTree(depth int, maxChildren int) Treer {
+func RandomTree(depth int, maxChildren int) Noder {
 	name := newName("Node")
 
 	if depth <= 0 {

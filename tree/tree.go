@@ -6,17 +6,17 @@ import (
 	"strings"
 )
 
-type Treer interface {
+type Noder interface {
 	ID() string
-	Parent() Treer
-	Children() []Treer
+	Parent() Noder
+	Children() []Noder
 	String() string
 
-	SetParent(Treer)
-	SetChildren([]Treer)
+	SetParent(Noder)
+	SetChildren([]Noder)
 }
 
-func Clone(t Treer, f func(t Treer) Treer) Treer {
+func Clone(t Noder, f func(t Noder) Noder) Noder {
 	if t == nil {
 		return nil
 	}
@@ -32,11 +32,11 @@ func Clone(t Treer, f func(t Treer) Treer) Treer {
 	return nt
 }
 
-func PrintTree(t Treer) {
+func PrintTree(t Noder) {
 	printTree([]bool{}, t)
 }
 
-func PrintTrees(ts []Treer, titles ...string) {
+func PrintTrees(ts []Noder, titles ...string) {
 	if titles == nil {
 		titles = []string{}
 	}
@@ -85,7 +85,7 @@ func PrintTrees(ts []Treer, titles ...string) {
 	}
 }
 
-func RandomPath(root Treer) string {
+func RandomPath(root Noder) string {
 	if root == nil {
 		return ""
 	}
@@ -112,9 +112,9 @@ func ReversePath(path string) string {
 	return strings.Join(parts, ".")
 }
 
-func FindNode(root Treer, path string) Treer {
-	var node Treer
-	ps := []Treer{root}
+func FindNode(root Noder, path string) Noder {
+	var node Noder
+	ps := []Noder{root}
 	for _, part := range strings.Split(path, ".") {
 		mached := false
 		for _, p := range ps {
@@ -133,7 +133,7 @@ func FindNode(root Treer, path string) Treer {
 	return node
 }
 
-func RebuildTreeByNode(node Treer) {
+func RebuildTreeByNode(node Noder) {
 	if node == nil || node.Parent() == nil {
 		return
 	}
@@ -149,7 +149,7 @@ func RebuildTreeByNode(node Treer) {
 	parent.SetParent(node)
 }
 
-func rebuildChildren(node Treer) []Treer {
+func rebuildChildren(node Noder) []Noder {
 	if node == nil || node.Parent() == nil {
 		return nil
 	}
@@ -157,10 +157,10 @@ func rebuildChildren(node Treer) []Treer {
 	parent := node.Parent()
 
 	if len(parent.Children()) == 0 {
-		return []Treer{parent}
+		return []Noder{parent}
 	}
 
-	var children []Treer
+	var children []Noder
 	for _, child := range parent.Children() {
 		if child == node {
 			children = append(children, parent)
@@ -172,14 +172,14 @@ func rebuildChildren(node Treer) []Treer {
 	return children
 }
 
-func printTree(prefixes []bool, t Treer) {
+func printTree(prefixes []bool, t Noder) {
 	fmt.Print(getPrefix(prefixes), t, "\n")
 	for idx, child := range t.Children() {
 		printTree(append(prefixes, idx != len(t.Children())-1), child)
 	}
 }
 
-func sprintTree(prefixes []bool, t Treer) []string {
+func sprintTree(prefixes []bool, t Noder) []string {
 	var ss []string
 	ss = append(ss, getPrefix(prefixes)+t.String())
 	for idx, child := range t.Children() {

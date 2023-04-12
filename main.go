@@ -71,7 +71,7 @@ func main() {
 
 func randTree() {
 	var titles []string
-	var trees []tree.Treer
+	var trees []tree.Noder
 
 	r := tree.RandomTree(4, 3)
 	titles = append(titles, "random tree")
@@ -260,7 +260,7 @@ type value struct {
 	children []*value
 }
 
-func NewValue(t tree.Treer) tree.Treer {
+func NewValue(t tree.Noder) tree.Noder {
 	if t == nil {
 		return nil
 	}
@@ -281,12 +281,12 @@ func (v value) ID() string {
 	return v.name
 }
 
-func (v value) Parent() tree.Treer {
+func (v value) Parent() tree.Noder {
 	return v.parent
 }
 
-func (v value) Children() []tree.Treer {
-	var children []tree.Treer
+func (v value) Children() []tree.Noder {
+	var children []tree.Noder
 	for _, child := range v.children {
 		children = append(children, child)
 	}
@@ -300,7 +300,7 @@ func (v value) String() string {
 	return fmt.Sprintf("%s(%s)", v.name, v.kind)
 }
 
-func (v *value) SetParent(parent tree.Treer) {
+func (v *value) SetParent(parent tree.Noder) {
 	if v == nil {
 		return
 	}
@@ -311,7 +311,7 @@ func (v *value) SetParent(parent tree.Treer) {
 	v.parent = parent.(*value)
 }
 
-func (v *value) SetChildren(children []tree.Treer) {
+func (v *value) SetChildren(children []tree.Noder) {
 	if v == nil {
 		return
 	}
