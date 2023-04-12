@@ -16,8 +16,73 @@ type Treer interface {
 	SetChildren([]Treer)
 }
 
+func Clone(t Treer, f func(t Treer) Treer) Treer {
+	if t == nil {
+		return nil
+	}
+
+	nt := f(t)
+	nt.SetParent(nil)
+	nt.SetChildren(nil)
+
+	for _, child := range t.Children() {
+		nt.SetChildren(append(nt.Children(), Clone(child, f)))
+	}
+
+	return nt
+}
+
 func PrintTree(t Treer) {
 	printTree([]bool{}, t)
+}
+
+func PrintTrees(ts []Treer, titles ...string) {
+	if titles == nil {
+		titles = []string{}
+	}
+
+	sss := [][]string{}
+	for i, t := range ts {
+		ss := sprintTree([]bool{}, t)
+		if len(titles) > 0 {
+			if i < len(titles) {
+				ss = append(ss, "", titles[i], "")
+			} else {
+				ss = append(ss, "", "", "")
+			}
+		}
+		sss = append(sss, ss)
+	}
+
+	var formats []string
+	var maxLine int
+	for _, ss := range sss {
+		max := 0
+		if len(ss) > maxLine {
+			maxLine = len(ss)
+		}
+		for _, s := range ss {
+			if len(s) > max {
+				max = len(s)
+			}
+		}
+		formats = append(formats, fmt.Sprintf("%%-%ds", max))
+	}
+
+	format := strings.Join(formats, " ")
+	for i := 0; i < maxLine; i++ {
+		var args []interface{}
+		for _, ss := range sss {
+			if i < len(ss) {
+				args = append(args, ss[i])
+			} else {
+				args = append(args, "")
+			}
+		}
+		// fmt.Println("format", format)
+		// fmt.Println("args", args)
+		fmt.Printf(format+"\n", args...)
+	}
 }
 
 func RandomPath(root Treer) string {
@@ -75,29 +140,36 @@ func RebuildTreeByNode(node Treer) {
 
 	parent := node.Parent()
 
-	siblings := siblings(node)
-	// fmt.Println(node.ID(), parent, "siblings:", siblings)
+	children := rebuildChildren(node)
 	parent.SetChildren(nil)
-	node.SetChildren(append([]Treer{parent}, siblings...))
+	node.SetChildren(children)
 	node.SetParent(nil)
 
 	RebuildTreeByNode(parent)
 	parent.SetParent(node)
 }
 
-func siblings(node Treer) []Treer {
+func rebuildChildren(node Treer) []Treer {
 	if node == nil || node.Parent() == nil {
 		return nil
 	}
 
-	var siblings []Treer
-	for _, child := range node.Parent().Children() {
-		if child != node {
-			siblings = append(siblings, child)
+	parent := node.Parent()
+
+	if len(parent.Children()) == 0 {
+		return []Treer{parent}
+	}
+
+	var children []Treer
+	for _, child := range parent.Children() {
+		if child == node {
+			children = append(children, parent)
+		} else {
+			children = append(children, child)
 		}
 	}
 
-	return siblings
+	return children
 }
 
 func printTree(prefixes []bool, t Treer) {
@@ -105,6 +177,15 @@ func printTree(prefixes []bool, t Treer) {
 	for idx, child := range t.Children() {
 		printTree(append(prefixes, idx != len(t.Children())-1), child)
 	}
+}
+
+func sprintTree(prefixes []bool, t Treer) []string {
+	var ss []string
+	ss = append(ss, getPrefix(prefixes)+t.String())
+	for idx, child := range t.Children() {
+		ss = append(ss, sprintTree(append(prefixes, idx != len(t.Children())-1), child)...)
+	}
+	return ss
 }
 
 func getPrefix(prefixes []bool) string {

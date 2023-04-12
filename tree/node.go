@@ -23,6 +23,21 @@ type Node struct {
 	children []*Node
 }
 
+func NewNode(t Treer) Treer {
+	if t == nil {
+		return nil
+	}
+
+	v, ok := t.(*Node)
+	if !ok {
+		return nil
+	}
+
+	return &Node{
+		Name: v.Name,
+	}
+}
+
 func (n *Node) ID() string {
 	if n == nil {
 		return ""

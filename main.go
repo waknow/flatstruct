@@ -66,20 +66,30 @@ func main() {
 		}
 	}
 
-	fmt.Println("Random Tree:")
-	rt := tree.RandomTree(4, 3)
-	tree.PrintTree(rt)
-	path = tree.RandomPath(rt)
-	fmt.Println("random path", path)
-	rt = tree.FindNode(rt, path)
-	tree.RebuildTreeByNode(rt)
-	tree.PrintTree(rt)
+	randTree()
+}
 
-	path = tree.ReversePath(path)
-	fmt.Println("reverse path", path)
-	rt = tree.FindNode(rt, path)
-	tree.RebuildTreeByNode(rt)
-	tree.PrintTree(rt)
+func randTree() {
+	var titles []string
+	var trees []tree.Treer
+
+	r := tree.RandomTree(4, 3)
+	titles = append(titles, "random tree")
+	trees = append(trees, tree.Clone(r, tree.NewNode))
+
+	path := tree.RandomPath(r)
+	fmt.Println("random path", path)
+	nr := tree.FindNode(r, path)
+
+	tree.RebuildTreeByNode(nr)
+	titles = append(titles, "rebuild by "+nr.ID())
+	trees = append(trees, tree.Clone(nr, tree.NewNode))
+
+	tree.RebuildTreeByNode(r)
+	titles = append(titles, "rebuild by "+r.ID())
+	trees = append(trees, tree.Clone(r, tree.NewNode))
+
+	tree.PrintTrees(trees, titles...)
 }
 
 func findRelateValues(v *value) ([]string, [][]interface{}, error) {
@@ -248,6 +258,23 @@ type value struct {
 
 	parent   *value
 	children []*value
+}
+
+func NewValue(t tree.Treer) tree.Treer {
+	if t == nil {
+		return nil
+	}
+
+	v, ok := t.(*value)
+	if !ok {
+		return nil
+	}
+
+	return &value{
+		name:  v.name,
+		kind:  v.kind,
+		value: v.value,
+	}
 }
 
 func (v value) ID() string {
