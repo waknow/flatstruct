@@ -32,18 +32,18 @@ func Clone(t Noder, f func(t Noder) Noder) Noder {
 	return nt
 }
 
-func PrintTree(t Noder) {
-	printTree([]bool{}, t)
+func Print(t Noder) {
+	print([]bool{}, t)
 }
 
-func PrintTrees(ts []Noder, titles ...string) {
+func Prints(ts []Noder, titles ...string) {
 	if titles == nil {
 		titles = []string{}
 	}
 
 	sss := [][]string{}
 	for i, t := range ts {
-		ss := sprintTree([]bool{}, t)
+		ss := sprint([]bool{}, t)
 		if len(titles) > 0 {
 			if i < len(titles) {
 				ss = append(ss, "", titles[i], "")
@@ -133,7 +133,7 @@ func FindNode(root Noder, path string) Noder {
 	return node
 }
 
-func RebuildTreeByNode(node Noder) {
+func Rebuild(node Noder) {
 	if node == nil || node.Parent() == nil {
 		return
 	}
@@ -145,7 +145,7 @@ func RebuildTreeByNode(node Noder) {
 	node.SetChildren(children)
 	node.SetParent(nil)
 
-	RebuildTreeByNode(parent)
+	Rebuild(parent)
 	parent.SetParent(node)
 }
 
@@ -172,18 +172,18 @@ func rebuildChildren(node Noder) []Noder {
 	return children
 }
 
-func printTree(prefixes []bool, t Noder) {
+func print(prefixes []bool, t Noder) {
 	fmt.Print(getPrefix(prefixes), t, "\n")
 	for idx, child := range t.Children() {
-		printTree(append(prefixes, idx != len(t.Children())-1), child)
+		print(append(prefixes, idx != len(t.Children())-1), child)
 	}
 }
 
-func sprintTree(prefixes []bool, t Noder) []string {
+func sprint(prefixes []bool, t Noder) []string {
 	var ss []string
 	ss = append(ss, getPrefix(prefixes)+t.String())
 	for idx, child := range t.Children() {
-		ss = append(ss, sprintTree(append(prefixes, idx != len(t.Children())-1), child)...)
+		ss = append(ss, sprint(append(prefixes, idx != len(t.Children())-1), child)...)
 	}
 	return ss
 }

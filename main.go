@@ -60,10 +60,10 @@ func main() {
 	}
 
 	children := node.Children()
-	tree.RebuildTreeByNode(node)
+	tree.Rebuild(node)
 	trees = append(trees, tree.Clone(node, NewValue))
 
-	tree.PrintTrees(trees)
+	tree.Prints(trees)
 
 	rows, err := toRows(children)
 	if err != nil {
@@ -154,15 +154,15 @@ func randTree() {
 	fmt.Println("random path", path)
 	nr := tree.FindNode(r, path)
 
-	tree.RebuildTreeByNode(nr)
+	tree.Rebuild(nr)
 	titles = append(titles, "rebuild by "+nr.ID())
 	trees = append(trees, tree.Clone(nr, tree.NewNode))
 
-	tree.RebuildTreeByNode(r)
+	tree.Rebuild(r)
 	titles = append(titles, "rebuild by "+r.ID())
 	trees = append(trees, tree.Clone(r, tree.NewNode))
 
-	tree.PrintTrees(trees, titles...)
+	tree.Prints(trees, titles...)
 }
 
 func findRelateValues(v *value) ([]string, [][]interface{}, error) {
