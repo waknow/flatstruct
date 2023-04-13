@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
-	"strings"
 	"struct-flat/tree"
 )
 
@@ -48,25 +48,98 @@ func main() {
 		value: p,
 	}
 	travelInterface(&root, p)
-	fmt.Println("Tree:")
-	tree.PrintTree(root)
+
+	var trees []tree.Noder
+	trees = append(trees, tree.Clone(root, NewValue))
 
 	path := "root.Addrs"
-	values := findValues(root, path)
-	fmt.Println("find values", path, values)
-
-	for _, value := range values {
-		names, values, err := findRelateValues(value)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println("names", names)
-		for _, value := range values {
-			fmt.Println("values", value)
-		}
+	node := tree.FindNode(root, path)
+	fmt.Println("find node", path, node)
+	if node == nil {
+		log.Fatal("cannot find node", path)
 	}
 
-	randTree()
+	children := node.Children()
+	tree.RebuildTreeByNode(node)
+	trees = append(trees, tree.Clone(node, NewValue))
+
+	tree.PrintTrees(trees)
+
+	rows, err := toRows(children)
+	if err != nil {
+		log.Fatal("to rows", err)
+	}
+
+	row, err := toRow(node)
+	if err != nil {
+		log.Fatal("to row", err)
+	}
+
+	for i, r := range rows {
+		fmt.Printf("[%02d] %+v %+v\n", i, r, row)
+	}
+
+	// randTree()
+}
+
+func toRows(nodes []tree.Noder) ([]map[string]interface{}, error) {
+	values := []map[string]interface{}{}
+	for _, node := range nodes {
+		v := node.(*value)
+		if v.kind != kindObject {
+			return nil, fmt.Errorf("node %s kind is not object", v.name)
+		}
+		m := map[string]interface{}{}
+		for _, child := range node.Children() {
+			v := child.(*value)
+			if v.kind != kindValue {
+				return nil, fmt.Errorf("node %s kind is not value", v.name)
+			}
+			m[v.name] = v.value
+		}
+		values = append(values, m)
+	}
+
+	return values, nil
+}
+
+func toRow(node tree.Noder) (map[string]interface{}, error) {
+	var result = map[string]interface{}{}
+	// fmt.Println("toRow", node.ID(), len(node.Children()))
+	for _, child := range node.Children() {
+		value := child.(*value)
+		// fmt.Println("toRow", node.ID(), "->", value.name, value.kind, len(value.children))
+
+		//skip original root node
+		if value.kind == kindObject && len(value.children) == 0 {
+			continue
+		}
+
+		switch value.kind {
+		case kindObject:
+			m, err := toRow(child)
+			if err != nil {
+				return nil, err
+			}
+			for k, v := range m {
+				result[k] = v
+			}
+		case kindArray:
+			bs, err := json.Marshal(value.value)
+			if err != nil {
+				return nil, fmt.Errorf("marshal array %s error: %s", value.name, err)
+			}
+			result[value.name] = string(bs)
+		case kindValue:
+			result[value.name] = value.value
+		default:
+			return nil, fmt.Errorf("unknown kind %s", value.kind)
+		}
+
+		// fmt.Println("toRow", result)
+	}
+
+	return result, nil
 }
 
 func randTree() {
@@ -224,27 +297,6 @@ func hasString(s string, ss []string) bool {
 	return false
 }
 
-func findValues(root *value, path string) []*value {
-	p := root
-
-	subs := strings.Split(path, ".")
-	for idx, sub := range subs {
-		if p.name == sub {
-			if idx == len(subs)-1 {
-				return []*value{p}
-			}
-			for _, child := range p.children {
-				if child.name == subs[idx+1] {
-					p = child
-					break
-				}
-			}
-		}
-	}
-
-	return nil
-}
-
 const (
 	kindValue  = "value"
 	kindArray  = "array"
@@ -282,6 +334,9 @@ func (v value) ID() string {
 }
 
 func (v value) Parent() tree.Noder {
+	if v.parent == nil {
+		return nil
+	}
 	return v.parent
 }
 
